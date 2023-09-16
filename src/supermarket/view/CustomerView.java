@@ -2,21 +2,28 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
-package supermarket.view;
+package Supermarket.view;
+package Customer.view;
+import Customer.controller.CustomerController;
+import Customer.model.CustomerModel;
 
-/**
- *
- * @author Chamidu
- */
-public class CustomerView extends javax.swing.JFrame {
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 
     /**
      * Creates new form CustomerView
      */
+    private final CustomerController customercontroller;
     public CustomerView() {
+        customercontroller= new CustomerController();
         initComponents();
+        loadAllCustomers();
     }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -92,12 +99,27 @@ public class CustomerView extends javax.swing.JFrame {
 
         addbutton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         addbutton.setText("Save");
+        addbutton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addbuttonActionPerformed(evt);
+            }
+        });
 
         deletebutton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         deletebutton.setText("Delete");
+        deletebutton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deletebuttonActionPerformed(evt);
+            }
+        });
 
         updatebutton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         updatebutton.setText("Update");
+        updatebutton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                updatebuttonActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout FormpanelLayout = new javax.swing.GroupLayout(Formpanel);
         Formpanel.setLayout(FormpanelLayout);
@@ -208,6 +230,18 @@ public class CustomerView extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void addbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addbuttonActionPerformed
+         saveCustomer();        // TODO add your handling code here:
+    }//GEN-LAST:event_addbuttonActionPerformed
+
+    private void updatebuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updatebuttonActionPerformed
+        updateCustomer();      // TODO add your handling code here:
+    }//GEN-LAST:event_updatebuttonActionPerformed
+
+    private void deletebuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deletebuttonActionPerformed
+        deleteCustomer();     // TODO add your handling code here:
+    }//GEN-LAST:event_deletebuttonActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -268,4 +302,100 @@ public class CustomerView extends javax.swing.JFrame {
     private javax.swing.JButton deletebutton;
     private javax.swing.JButton updatebutton;
     // End of variables declaration//GEN-END:variables
+
+     private void saveCustomer(){
+        CustomerModel cm;
+        cm = new CustomerModel(custIdText.getText(),(String)custTitlebox.getSelectedItem(),custFirstNameText.getText(), custLastNameText.getText(),custAddressText.getText(),custziptext.getText(),(int)Double.parseDouble(custAgeText.getText()),mobileText.getText(),genderText.getText());
+        try {
+            String resp=customercontroller.saveCustomer(cm);
+            JOptionPane.showMessageDialog(this,resp);
+            clear();
+            loadAllCustomers();
+        } catch (SQLException ex) {
+            Logger.getLogger(CustomerView.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(this,ex.getMessage());
+        }
+    }
+     private void deleteCustomer() {
+        CustomerModel cm = new CustomerModel(custIdText.getText(),(String)custTitlebox.getSelectedItem(),custFirstNameText.getText(), custLastNameText.getText(),custAddressText.getText(),custziptext.getText(),(int)Double.parseDouble(custAge.getText()),mobileText.getText(),genderText.getText());
+        try {
+            String resp=customercontroller.deleteCustomer(cm);
+            JOptionPane.showMessageDialog(this,resp);
+             clear();
+            loadAllCustomers();
+        } catch (SQLException ex) {
+            Logger.getLogger(CustomerView.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(this,ex.getMessage());
+        }
 }
+    
+        private void updateCustomer() {
+        CustomerModel cm = new CustomerModel(custIdText.getText(),(String)custTitlebox.getSelectedItem(),custFirstNameText.getText(), custLastNameText.getText(),custAddressText.getText(),custziptext.getText(),(int)Double.parseDouble(custAge.getText()),mobileText.getText(),genderText.getText());
+        try {
+            String resp=customercontroller.updateCustomer(cm);
+            JOptionPane.showMessageDialog(this,resp);
+            clear();
+            loadAllCustomers();
+        } catch (SQLException ex) {
+            Logger.getLogger(CustomerView.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(this,ex.getMessage());
+        }
+    }
+ private void clear() {
+       custIdText.setText("");
+     custFirstNameText.setText("");
+        custLastNameText.setText("");
+        custAddressText.setText("");
+        custziptext.setText("");
+        custAge.setText("");
+        mobileText.setText("");
+        genderText.setText("");
+        
+        
+ }
+  private void loadAllCustomers(){
+    
+        try{
+        String [] collumns ={"ID","Title","FirstName","LastName","Address","Zip","Age","Mobile","Gender"};
+    DefaultTableModel dtm = new DefaultTableModel(collumns,0){
+  @Override
+                public boolean isCellEditable(int row, int column) {
+                    return false;
+                }
+            };
+            customerTable.setModel(dtm);
+      
+            ArrayList<CustomerModel> cm = CustomerController.getAllCustomers();
+
+            for (CustomerModel customer : cm) {
+                Object[] rowData = {customer.getId(),customer.getTitle(), customer.getFirstName() , customer.getLastName(),customer.getAddress(),customer.getZipcode(),customer.getAge(),customer.getMobile(),customer.getGender()};
+                dtm.addRow(rowData);
+            }
+        }catch (SQLException ex) {
+           Logger.getLogger(CustomerView.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(this, ex.getMessage());
+        
+}  
+ }
+ 
+private void searchCustomer(){
+        try {
+            String id=customerTable.getValueAt(customerTable.getSelectedRow(), 0).toString();
+            CustomerModel customermodel=customercontroller.searchCustomer(id);
+            if(customermodel!=null){
+                custIdText.setText(customermodel.getId());
+                custTitlebox.setToolTipText(customermodel.getTitle());
+                custFirstNameText.setText(customermodel.getFirstName());
+                custLastNameText.setText(customermodel.getLastName());
+                custAddressText.setText(customermodel.getAddress());
+                custziptext.setText(customermodel.getZipcode());
+                custAge.setText(Integer.toString(customermodel.getAge()));
+                mobileText.setText(customermodel.getMobile());
+                genderText.setText(customermodel.getGender());
+            }else{
+                JOptionPane.showMessageDialog(this, "Customer Not Found");
+                
+            }  } catch (SQLException ex) {
+            Logger.getLogger(CustomerView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+ }
